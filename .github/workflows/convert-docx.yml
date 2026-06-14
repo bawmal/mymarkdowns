@@ -1,0 +1,47 @@
+name: Convert DOCX to Markdown
+
+on:
+  push:
+    paths:
+      - '**.docx'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Convert DOCX to Markdown
+        run: |
+          find . -name "*.docx" | while read -r file; do
+            output_file="${file%.docx}.md"
+            echo "Converting $file to $output_file"
+            pandoc -f docx -t gfm --extract-media=. "$file" -o "$output_file"
+          done
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@://github.com"
+          
+          git add *.md
+          if [ -d "media" ]; then git add media/; fi
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "Automated conversion of DOCX to Markdown"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
