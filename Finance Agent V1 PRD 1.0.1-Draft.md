@@ -2,7 +2,7 @@
 
 **Product Requirements Document**
 
-**Version:** 1.0
+**Version:** 1.0.1
 
 **Status:** Ongoing Review
 
